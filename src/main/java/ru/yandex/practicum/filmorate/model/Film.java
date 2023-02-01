@@ -18,7 +18,6 @@ public class Film {
     @Size(min = 1, max = 200)
     private String description;
     @NotNull
-    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate releaseDate;
     @Min(1)
     private long duration;
