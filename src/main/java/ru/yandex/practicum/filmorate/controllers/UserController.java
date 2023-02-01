@@ -56,7 +56,7 @@ public class UserController extends AbstractController<User> {
             log.info("ValidateException: {}", "Логин не может быть пустым или содержать пробелы");
             throw new ValidateException("Логин не может быть пустым или содержать пробелы");
         }
-        if (user.getName().isBlank()) {
+        if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
             log.info("В качестве имени пользователя установлен логин {}", user.getLogin());
         }

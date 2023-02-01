@@ -55,7 +55,6 @@ public class UserControllerTest {
         final User user = new User();
         user.setEmail("test@ya.ru");
         user.setLogin("TestCorrectLogin");
-        user.setName("");
         user.setBirthday(LocalDate.of(1990, 10, 12));
         userController.validate(user);
         assertEquals("TestCorrectLogin", user.getName());
