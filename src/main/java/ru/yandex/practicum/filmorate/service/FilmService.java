@@ -44,9 +44,18 @@ public class FilmService {
         }
     }
 
+    public long getLikesAmount(long filmId) {
+        if (filmStorage.get(filmId) != null) {
+            return filmStorage.get(filmId).getLikes();
+        } else {
+            log.info("ItemNotFoundException: {}", "Фильм с такими id не найден");
+            throw new ItemNotFoundException("Фильм с такими id не найден");
+        }
+    }
+
     public List<Film> getTopFilms(int count) {
         return filmStorage.getAll().stream()
-                .sorted(Comparator.comparingLong(Film::getLikesCount))
+                .sorted(Comparator.comparingLong(Film::getLikesCount).reversed())
                 .limit(count)
                 .collect(Collectors.toList());
     }

@@ -70,8 +70,14 @@ public class FilmController extends AbstractController<Film> {
         filmService.deleteLike(id, userId);
     }
 
-    @GetMapping("/popular?count={count}")
-    public List<Film> getPopular(@PathVariable Optional<Integer> count) {
+    @GetMapping("{id}/likes")
+    public long getLikes(@PathVariable long id) {
+        log.info("Отображение количества лайков у фильма с id {}", id);
+        return filmService.getLikesAmount(id);
+    }
+
+    @GetMapping("/popular")
+    public List<Film> getPopular(@RequestParam Optional<Integer> count) {
         log.info("Получение списка наиболее популярных фильмов");
         if (count.isPresent()) {
             return filmService.getTopFilms(count.get());

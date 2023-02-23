@@ -40,4 +40,8 @@ public class Film extends AbstractItem {
             likesCount--;
         }
     }
+
+    public long getLikes() {
+        return likesCount;
+    }
 }
