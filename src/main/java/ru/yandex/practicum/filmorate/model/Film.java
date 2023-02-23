@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.validation.constraints.Min;
@@ -8,11 +8,11 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
-public class Film {
-    @NotNull
-    private int id;
+public class Film extends AbstractItem {
     @NotBlank
     private String name;
     @Size(min = 1, max = 200)
@@ -21,4 +21,23 @@ public class Film {
     private LocalDate releaseDate;
     @Min(1)
     private long duration;
+
+    @JsonIgnore
+    private Set<Long> likedUsersIds = new HashSet<>();
+    @JsonIgnore
+    private long likesCount = 0L;
+
+    public void addLike(long userId) {
+        if (!likedUsersIds.contains(userId)) {
+            likedUsersIds.add(userId);
+            likesCount++;
+        }
+    }
+
+    public void deleteLike(long userId) {
+        if (likedUsersIds.contains(userId)) {
+            likedUsersIds.remove(userId);
+            likesCount--;
+        }
+    }
 }
