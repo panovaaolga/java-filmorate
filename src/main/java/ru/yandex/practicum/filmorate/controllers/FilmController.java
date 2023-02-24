@@ -16,6 +16,7 @@ import java.util.*;
 @Slf4j
 public class FilmController extends AbstractController<Film> {
     private final FilmService filmService;
+    private final static int DEFAULT_TOP_FILMS = 10;
 
     public FilmController(FilmService filmService) {
         this.filmService = filmService;
@@ -82,7 +83,7 @@ public class FilmController extends AbstractController<Film> {
         if (count.isPresent()) {
             return filmService.getTopFilms(count.get());
         }
-        return filmService.getTopFilms(10);
+        return filmService.getTopFilms(DEFAULT_TOP_FILMS);
     }
 
 }
