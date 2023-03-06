@@ -7,7 +7,9 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Past;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @Data
@@ -29,5 +31,14 @@ public class User extends AbstractItem {
 
     public void removeFriend(long friendId) {
         friends.remove(friendId);
+    }
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> values = new HashMap<>();
+        values.put("user_name", name);
+        values.put("email", email);
+        values.put("login", login);
+        values.put("birthday", birthday);
+        return values;
     }
 }

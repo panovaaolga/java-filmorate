@@ -9,6 +9,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -21,6 +22,9 @@ public class Film extends AbstractItem {
     private LocalDate releaseDate;
     @Min(1)
     private long duration;
+    @NotNull
+    private MpaRating rating;
+    private List<Genre> genres;
 
     @JsonIgnore
     private Set<Long> likedUsersIds = new HashSet<>();

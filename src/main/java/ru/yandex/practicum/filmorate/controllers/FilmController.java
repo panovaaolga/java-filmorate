@@ -1,11 +1,12 @@
 package ru.yandex.practicum.filmorate.controllers;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.ItemNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidateException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.MpaRating;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
@@ -84,6 +85,30 @@ public class FilmController extends AbstractController<Film> {
             return filmService.getTopFilms(count.get());
         }
         return filmService.getTopFilms(DEFAULT_TOP_FILMS);
+    }
+
+    @GetMapping("/genres")
+    public List<Genre> getGenres() {
+        log.info("Получение списка всех жанров");
+        return null; //доделать
+    }
+
+    @GetMapping("/genres/{id}")
+    public Genre getGenreById(@PathVariable int id) {
+        log.info("Получение жанра с id {}", id);
+        return null; //доделать
+    }
+
+    @GetMapping("/mpa")
+    public List<MpaRating> getRating() {
+        log.info("Получение списка рейтингов");
+        return null; //доделать
+    }
+
+    @GetMapping("/mpa/{id}")
+    public MpaRating getRatingById(@PathVariable int id) {
+        log.info("Получение рейтинга с id {}", id);
+        return null; //доделать
     }
 
 }
