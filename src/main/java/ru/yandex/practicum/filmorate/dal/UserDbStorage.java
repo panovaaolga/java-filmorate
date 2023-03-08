@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.dal;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -9,6 +9,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.ItemNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidateException;
+import ru.yandex.practicum.filmorate.model.Status;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
@@ -16,13 +17,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 @Component
 @Primary
 public class UserDbStorage implements UserStorage {
+    @Getter
     private final JdbcTemplate jdbcTemplate;
 
     public UserDbStorage(JdbcTemplate jdbcTemplate) {
@@ -31,12 +31,10 @@ public class UserDbStorage implements UserStorage {
     @Override
     public void create(User user) throws ValidateException {
         validate(user);
-//        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
-//                .withTableName("users")
-//                .usingGeneratedKeyColumns("user_id");
-        String sql = "insert into users (user_name, email, login, birthday) values (?, ?, ?, ?)";
-        jdbcTemplate.update(sql, user.getName(), user.getEmail(), user.getLogin(), user.getBirthday());
-//        user.setId(simpleJdbcInsert.executeAndReturnKey(user.toMap()).longValue());
+        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
+                .withTableName("users")
+                .usingGeneratedKeyColumns("user_id");
+        user.setId(simpleJdbcInsert.executeAndReturnKey(user.toMap()).longValue());
     }
 
     @Override
@@ -92,6 +90,81 @@ public class UserDbStorage implements UserStorage {
         }
         log.info("Пользователь с id {} не найден", id);
         throw new ItemNotFoundException("Пользователь с таким id не найден");
+    }
+
+    @Override
+    public void addFriend(long userId, long friendId) {
+        try {
+            String sqlAddFriend = "insert into users_friends (user_id, friend_id, status) " +
+                    "values (?, ?, ?)";
+            jdbcTemplate.update(sqlAddFriend, userId, friendId, Status.ACCEPTED.toString());
+        } catch (Exception e) {
+            String sqlQuery = "select status from users_friends where user_id = ? and friend_id = ?";
+            String response = jdbcTemplate.queryForObject(sqlQuery, String.class, userId, friendId);
+            System.out.println("response: " + response);
+            if (response.equals("ACCEPTED")) {
+                log.info("Пользователь с id {} уже в друзьях у пользователя с id {}", friendId, userId);
+                throw new IllegalArgumentException("Пользователь уже у вас в друзьях");
+            } else if (response.equals("NOT_ACCEPTED")) {
+                String sqlFriendAcceptance = "update users_friends set status = ? where user_id = ? and friend_id = ?";
+                jdbcTemplate.update(sqlFriendAcceptance, Status.ACCEPTED.toString(), userId, friendId);
+            } else {
+                log.info("Пользователи с указанными id не найдены");
+                throw new ItemNotFoundException("Пользователи с указанными id не найдены");
+            }
+        }
+        log.info("Пользователь {} успешно добавлен в друзья к пользователю {}", friendId, userId);
+        try {
+            String sqlSendRequest = "insert into users_friends (user_id, friend_id, status) " +
+                    "values (?, ?, ?)";
+            jdbcTemplate.update(sqlSendRequest, friendId, userId, Status.NOT_ACCEPTED.toString());
+            log.info("Заявка в друзья пользователю {} успешно отправлена", friendId);
+        } catch (Exception e) {
+            String sqlQuery = "select status from users_friends where user_id = ? and friend_id = ?";
+            String response = jdbcTemplate.queryForObject(sqlQuery, String.class, friendId, userId);
+            System.out.println("Response2: " + response);
+            if (response.equals("ACCEPTED")) {
+                log.info("Пользователь с id {} уже в друзьях у пользователя с id {}", userId, friendId);
+                throw new IllegalArgumentException("Пользователь уже у вас в друзьях");
+            } else if (response.equals("NOT_ACCEPTED")) {
+                log.info("Пользователь {} пока не подтвердил дружбу", friendId);
+            } else {
+                log.info("Пользователи с указанными id не найдены");
+                throw new ItemNotFoundException("Пользователи с указанными id не найдены");
+            }
+        }
+    }
+
+    @Override
+    public void deleteFriend(long userId, long friendId) {
+        String sql = "update users_friends set status = ? where user_id = ? and friend_id = ?";
+        int result = jdbcTemplate.update(sql, Status.NOT_ACCEPTED.toString(), userId, friendId);
+        if (result == 0) {
+            log.info("Не удалось удалить пользователя {} из друзей", friendId);
+            throw new ItemNotFoundException("Не удалось удалить пользователя из друзей");
+        }
+        log.info("Пользователь {} больше не ваш друг", friendId);
+    }
+
+    @Override
+    public Collection<User> getFriends(long userId) {
+        String sql = "SELECT * " +
+                "FROM users \n" +
+                "WHERE user_id IN (\n" +
+                "SELECT friend_id\n" +
+                "FROM USERS_FRIENDS \n" +
+                "WHERE user_id = ? \n" +
+                "AND status = ?)\n" +
+                "ORDER BY USER_NAME";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> makeUser(rs), userId, Status.ACCEPTED.toString());
+    }
+
+    @Override
+    public Collection<User> getCommonFriends(long firstId, long secondId) {
+        String sql = "SELECT * FROM users WHERE user_id IN (SELECT friend_id FROM users_friends " +
+                "WHERE user_id = ? AND friend_id IN (SELECT friend_id FROM users_friends WHERE user_id = ?" +
+                "AND status = ?))";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> makeUser(rs), firstId, secondId, Status.ACCEPTED.toString());
     }
 
     @Override

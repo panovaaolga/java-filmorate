@@ -60,24 +60,24 @@ public class UserController extends AbstractController<User> {
     @PutMapping("/{id}/friends/{friendId}")
     public void addFriend(@PathVariable("id") long id, @PathVariable("friendId") long friendId) {
         log.info("Добавление пользователя {} в друзья к пользователю {}", friendId, id);
-        userService.makeFriendship(id, friendId);
+        userService.addFriend(id, friendId);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
     public void deleteFriend(@PathVariable("id") long id, @PathVariable("friendId") long friendId) {
         log.info("Удаление пользователя {} из друзей пользователя {}", friendId, id);
-        userService.deleteFriends(id, friendId);
+        userService.deleteFriend(id, friendId);
     }
 
     @GetMapping("/{id}/friends")
-    public List<User> getFriends(@PathVariable long id) {
+    public Collection<User> getFriends(@PathVariable long id) {
         log.info("Получение списка всех друзей ползьвателя {}", id);
-        return userService.getAllFriends(id);
+        return userService.getFriends(id);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
-    public List<User> getCommonFriends(@PathVariable("id") long id, @PathVariable("otherId") long otherId) {
+    public Collection<User> getCommonFriends(@PathVariable("id") long id, @PathVariable("otherId") long otherId) {
         log.info("Получение списка общих друзей пользователей {} и {}", id, otherId);
-        return userService.getMutualFriends(id, otherId);
+        return userService.getCommonFriends(id, otherId);
     }
 }

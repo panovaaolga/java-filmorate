@@ -8,9 +8,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Data
 public class Film extends AbstractItem {
@@ -22,8 +20,7 @@ public class Film extends AbstractItem {
     private LocalDate releaseDate;
     @Min(1)
     private long duration;
-    @NotNull
-    private MpaRating rating;
+    private MpaRating mpa;
     private List<Genre> genres;
 
     @JsonIgnore
@@ -47,5 +44,15 @@ public class Film extends AbstractItem {
 
     public long getLikes() {
         return likesCount;
+    }
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> values = new HashMap<>();
+        values.put("title", name);
+        values.put("description", description);
+        values.put("release_date", releaseDate);
+        values.put("duration", duration);
+        values.put("rating_id", mpa.getId());
+        return values;
     }
 }
