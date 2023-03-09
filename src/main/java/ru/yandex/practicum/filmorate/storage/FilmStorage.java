@@ -19,4 +19,11 @@ public interface FilmStorage {
 
     void validate(Film film) throws ValidateException;
 
+    void addLike(long filmId, long userId);
+
+    void deleteLike(long filmId, long userId);
+
+    int getLikes(long filmId);
+
+    Collection<Film> getPopular(int count);
 }

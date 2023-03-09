@@ -12,13 +12,11 @@ import ru.yandex.practicum.filmorate.exceptions.ValidateException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MpaRating;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -80,10 +78,6 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film get(long id) {
-//        SqlRowSet filmRows = jdbcTemplate.queryForRowSet("select * from films as f" +
-//                "left join ratings as r on f.rating_id=r.rating_id left join genres_films as gf on f.film_id=gf.film_id " +
-//                "left join genres as g on gf.genre_id=g.genre_id where f.film_id = ?", id);
-
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet("select * from films as f" +
                 " left join ratings as r on f.rating_id=r.rating_id where f.film_id = ?", id);
 
@@ -136,7 +130,47 @@ public class FilmDbStorage implements FilmStorage {
         rating.setName(rs.getString("rating_name"));
         film.setMpa(rating);
         film.setGenres(getGenresByFilmId(film.getId()));
+        film.setLikesCount(getLikes(film.getId()));
         return film;
+    }
+
+    @Override
+    public void addLike(long filmId, long userId) {
+        try {
+            String sql = "insert into films_likes (film_id, user_id) values (?, ?)";
+            jdbcTemplate.update(sql, filmId, userId);
+            log.info("Лайк от пользователя {} успешно добавлен", userId);
+        } catch (Exception e) {
+            log.info("Лайк не был добавлен");
+            throw new IllegalArgumentException("Невозможно добавить лайк");
+        }
+    }
+
+    @Override
+    public void deleteLike(long filmId, long userId) {
+        String sql = "delete from films_likes where film_id = ? and user_id = ?";
+        int result = jdbcTemplate.update(sql, filmId, userId);
+        if (result == 0) {
+            log.info("Невозможно удалить лайк");
+            throw new ItemNotFoundException("Невозможно удалить лайк");
+        }
+        log.info("Лайк от пользователя {} успешно удален", userId);
+    }
+
+    @Override
+    public int getLikes(long filmId) {
+        String sql = "SELECT COUNT(film_id) as likes_amount\n" +
+                "FROM films_likes \n" +
+                "WHERE film_id = ?";
+        return jdbcTemplate.queryForObject(sql, Integer.class, filmId);
+    }
+
+    @Override
+    public Collection<Film> getPopular(int count) {
+        String sql = "SELECT * FROM films AS f LEFT JOIN films_likes AS fl ON f.film_id=fl.film_id" +
+                " LEFT JOIN ratings AS r ON f.rating_id=r.rating_id GROUP BY f.film_id ORDER BY COUNT(fl.film_id) DESC, " +
+                "f.title LIMIT ?";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), count);
     }
 
     @Override

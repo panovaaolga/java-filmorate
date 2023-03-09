@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.exceptions.ValidateException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
+import java.util.Collection;
 
 @Component
 @Slf4j
@@ -30,5 +31,25 @@ public class InMemoryFilmStorage extends AbstractInMemoryStorage<Film> implement
             log.info("ValidateException: {}", "Продолжительность должна быть положительной");
             throw new ValidateException("Продолжительность должна быть положительной");
         }
+    }
+
+    @Override
+    public void addLike(long filmId, long userId) {
+
+    }
+
+    @Override
+    public void deleteLike(long filmId, long userId) {
+
+    }
+
+    @Override
+    public int getLikes(long filmId) {
+        return 0;
+    }
+
+    @Override
+    public Collection<Film> getPopular(int count) {
+        return null;
     }
 }
