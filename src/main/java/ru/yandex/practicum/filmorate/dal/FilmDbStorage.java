@@ -68,6 +68,24 @@ public class FilmDbStorage implements FilmStorage {
             log.info("Фильм с id {} не найден", film.getId());
             throw new ItemNotFoundException("Фильм с таким id не найден");
         }
+        if (film.getMpa() != null) {
+            String sqlRating = "select rating_name from ratings where rating_id = ?";
+            String ratingName = jdbcTemplate.queryForObject(sqlRating, String.class, film.getMpa().getId());
+            film.getMpa().setName(ratingName);
+        }
+
+        String sqlDeleteGenres = "delete from genres_films where film_id = ?";
+        jdbcTemplate.update(sqlDeleteGenres, film.getId());
+        if (film.getGenres() != null) {
+            for (Genre g : film.getGenres()) {
+                String sqlFilmGenre = "merge into genres_films (film_id, genre_id) " +
+                        "values (?, ?)";
+                jdbcTemplate.update(sqlFilmGenre, film.getId(), g.getId());
+            }
+            String sqlGenres = "select g.genre_id, g.genre_name from genres as g join genres_films as gf " +
+                    "on g.genre_id = gf.genre_id where gf.film_id = ?";
+            film.setGenres(jdbcTemplate.query(sqlGenres, (rs, rowNum) -> makeGenre(rs), film.getId()));
+        }
     }
 
     @Override
@@ -78,26 +96,13 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film get(long id) {
-        SqlRowSet filmRows = jdbcTemplate.queryForRowSet("select * from films as f" +
-                " left join ratings as r on f.rating_id=r.rating_id where f.film_id = ?", id);
-
-        if (filmRows.next()) {
-            Film film = new Film();
-            MpaRating rating = new MpaRating();
-            film.setId(filmRows.getLong("film_id"));
-            film.setName(filmRows.getString("title"));
-            film.setDuration(filmRows.getInt("duration"));
-            film.setReleaseDate(filmRows.getDate("release_date").toLocalDate());
-            film.setDescription(filmRows.getString("description"));
-            rating.setId(filmRows.getInt("rating_id"));
-            rating.setName(filmRows.getString("rating_name"));
-            film.setMpa(rating);
-            film.setGenres(getGenresByFilmId(film.getId()));
-            log.info("Найден пользователь с id {}", film.getId());
-            return film;
+        try {
+        String sql = "select * from films as f left join ratings as r on f.rating_id=r.rating_id where f.film_id = ?";
+         return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> makeFilm(rs), id);
+        } catch (Exception e) {
+            log.info("Пользователь с id {} не найден", id);
+            throw new ItemNotFoundException("Пользователь с таким id не найден");
         }
-        log.info("Пользователь с id {} не найден", id);
-        throw new ItemNotFoundException("Пользователь с таким id не найден");
     }
 
     private List<Genre> getGenresByFilmId(long filmId) {
@@ -120,14 +125,12 @@ public class FilmDbStorage implements FilmStorage {
 
     private Film makeFilm(ResultSet rs) throws SQLException {
         Film film = new Film();
-        MpaRating rating = new MpaRating();
+        MpaRating rating = new MpaRating(rs.getInt("rating_id"), rs.getString("rating_name"));
         film.setId(rs.getLong("film_id"));
         film.setName(rs.getString("title"));
         film.setDescription(rs.getString("description"));
         film.setDuration(rs.getInt("duration"));
         film.setReleaseDate(rs.getDate("release_date").toLocalDate());
-        rating.setId(rs.getInt("rating_id"));
-        rating.setName(rs.getString("rating_name"));
         film.setMpa(rating);
         film.setGenres(getGenresByFilmId(film.getId()));
         film.setLikesCount(getLikes(film.getId()));
@@ -171,6 +174,42 @@ public class FilmDbStorage implements FilmStorage {
                 " LEFT JOIN ratings AS r ON f.rating_id=r.rating_id GROUP BY f.film_id ORDER BY COUNT(fl.film_id) DESC, " +
                 "f.title LIMIT ?";
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), count);
+    }
+
+    @Override
+    public Collection<Genre> getGenres() {
+        String sql = "select * from genres";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> makeGenre(rs));
+    }
+
+    @Override
+    public Genre getGenre(int genreId) {
+        try {
+            String sql = "select * from genres where genre_id = ?";
+            return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> makeGenre(rs), genreId);
+        } catch (Exception e) {
+            log.info("Жанр с id {} не найден", genreId);
+            throw  new ItemNotFoundException("Жанр с таким id не найден");
+        }
+    }
+
+    @Override
+    public Collection<MpaRating> getRatings() {
+        String sql = "select * from ratings";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> new MpaRating(rs.getInt("rating_id"),
+                rs.getString("rating_name")));
+    }
+
+    @Override
+    public MpaRating getMpa(int mpaId) {
+        try {
+            String sql = "select * from ratings where rating_id = ?";
+            return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> new MpaRating(rs.getInt("rating_id"),
+                    rs.getString("rating_name")), mpaId);
+        } catch (Exception e) {
+            log.info("Рейтинг с id {} не найден", mpaId);
+            throw new ItemNotFoundException("Рейтинг с таким id не найден");
+        }
     }
 
     @Override

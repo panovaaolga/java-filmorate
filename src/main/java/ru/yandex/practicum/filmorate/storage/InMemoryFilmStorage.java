@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.ValidateException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.MpaRating;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -50,6 +52,26 @@ public class InMemoryFilmStorage extends AbstractInMemoryStorage<Film> implement
 
     @Override
     public Collection<Film> getPopular(int count) {
+        return null;
+    }
+
+    @Override
+    public Collection<Genre> getGenres() {
+        return null;
+    }
+
+    @Override
+    public Genre getGenre(int genreId) {
+        return null;
+    }
+
+    @Override
+    public Collection<MpaRating> getRatings() {
+        return null;
+    }
+
+    @Override
+    public MpaRating getMpa(int mpaId) {
         return null;
     }
 }

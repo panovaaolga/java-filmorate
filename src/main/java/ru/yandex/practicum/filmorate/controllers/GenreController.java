@@ -17,6 +17,7 @@ public class GenreController extends AbstractController<Genre> {
     public GenreController(FilmService filmService) {
         this.filmService = filmService;
     }
+
     @Override
     public Genre create(Genre genre) throws ValidateException {
         return null;
@@ -30,13 +31,15 @@ public class GenreController extends AbstractController<Genre> {
     @Override
     @GetMapping
     public Collection<Genre> getAll() {
-        return null;
+        log.info("Получение списка всех жанров");
+        return filmService.getFilmStorage().getGenres();
     }
 
     @Override
     @GetMapping("/{id}")
     public Genre get(@PathVariable long id) {
-        return null;
+        log.info("Получение жанра с id {}", id);
+        return filmService.getFilmStorage().getGenre((int)id);
     }
 
     @Override

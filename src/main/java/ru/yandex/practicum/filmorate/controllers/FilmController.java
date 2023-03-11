@@ -87,28 +87,4 @@ public class FilmController extends AbstractController<Film> {
         return filmService.getPopular(DEFAULT_TOP_FILMS);
     }
 
-    @GetMapping("/genres")
-    public List<Genre> getGenres() {
-        log.info("Получение списка всех жанров");
-        return null; //доделать
-    }
-
-    @GetMapping("/genres/{id}")
-    public Genre getGenreById(@PathVariable int id) {
-        log.info("Получение жанра с id {}", id);
-        return null; //доделать
-    }
-
-    @GetMapping("/mpa")
-    public List<MpaRating> getRating() {
-        log.info("Получение списка рейтингов");
-        return null; //доделать
-    }
-
-    @GetMapping("/mpa/{id}")
-    public MpaRating getRatingById(@PathVariable int id) {
-        log.info("Получение рейтинга с id {}", id);
-        return null; //доделать
-    }
-
 }

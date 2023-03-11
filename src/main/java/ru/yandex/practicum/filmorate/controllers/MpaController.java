@@ -31,13 +31,15 @@ public class MpaController extends AbstractController<MpaRating>{
     @Override
     @GetMapping
     public Collection<MpaRating> getAll() {
-        return null;
+        log.info("Получение списка рейтингов");
+        return filmService.getFilmStorage().getRatings();
     }
 
     @Override
     @GetMapping("/{id}")
     public MpaRating get(@PathVariable long id) {
-        return null;
+        log.info("Получение рейтинга с id {}", id);
+        return filmService.getFilmStorage().getMpa((int)id);
     }
 
     @Override

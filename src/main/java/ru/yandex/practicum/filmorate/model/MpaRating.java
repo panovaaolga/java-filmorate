@@ -10,4 +10,9 @@ public class MpaRating {
     private int id;
     @NotNull
     private String name;
+
+    public MpaRating(int id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 }
