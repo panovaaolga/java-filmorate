@@ -12,6 +12,9 @@ import ru.yandex.practicum.filmorate.dal.FilmDbStorage;
 import ru.yandex.practicum.filmorate.dal.UserDbStorage;
 import ru.yandex.practicum.filmorate.exceptions.ItemNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidateException;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.MpaRating;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
@@ -158,4 +161,151 @@ class FilmorateApplicationTests {
 		assertThatThrownBy(() -> userStorage.get(2)).isInstanceOf(ItemNotFoundException.class);
 	}
 
+	@Test
+	@Order(12)
+	public void shouldCreateFilm() throws ValidateException {
+		Film film = new Film();
+		film.setName("Test Film");
+		film.setDescription("Test description");
+		film.setDuration(120);
+		film.setReleaseDate(LocalDate.of(2008, 05, 05));
+		film.setMpa(new MpaRating(2, null));
+		filmDbStorage.create(film);
+		assertThat(film).hasFieldOrPropertyWithValue("id", 1L);
+		assertThat(film).hasFieldOrPropertyWithValue("name", "Test Film");
+	}
+
+	@Test
+	@Order(13)
+	public void shouldThrowExceptionWhenUpdateFilm() throws ValidateException {
+		Film film = new Film();
+		film.setName("Test Film 2.0");
+		film.setDescription("Test description");
+		film.setDuration(120);
+		film.setReleaseDate(LocalDate.of(2008, 05, 05));
+		film.setMpa(new MpaRating(1, null));
+		assertThatThrownBy(() -> filmDbStorage.update(film)).isInstanceOf(ItemNotFoundException.class);
+	}
+
+	@Test
+	@Order(14)
+	public void shouldReturnFilmById() {
+		Optional<Film> filmOptional = Optional.of(filmDbStorage.get(1));
+
+		assertThat(filmOptional)
+				.isPresent()
+				.hasValueSatisfying(film ->
+						assertThat(film).hasFieldOrPropertyWithValue("id", 1L)
+								.hasFieldOrPropertyWithValue("description", "Test description")
+				);
+	}
+
+	@Test
+	@Order(15)
+	public void shouldReturnAllFilms() throws ValidateException {
+		Film film = new Film();
+		film.setName("Test Film 2.0");
+		film.setDescription("Test description 2.0");
+		film.setDuration(120);
+		film.setReleaseDate(LocalDate.of(2007, 05, 05));
+		film.setMpa(new MpaRating(1, null));
+		filmDbStorage.create(film);
+
+		Film film2 = new Film();
+		film2.setName("Test Film 3.0");
+		film2.setDescription("Test description 3.0");
+		film2.setDuration(160);
+		film2.setReleaseDate(LocalDate.of(2006, 05, 05));
+		film2.setMpa(new MpaRating(5, null));
+		filmDbStorage.create(film2);
+
+		Collection<Film> filmCollection = filmDbStorage.getAll();
+		assertThat(filmCollection).isNotNull().isNotEmpty().hasSize(3);
+	}
+
+	@Test
+	@Order(16)
+	public void shouldAddLike() {
+		filmDbStorage.addLike(2, 1);
+
+		Film film = filmDbStorage.get(2);
+		assertThat(film).hasFieldOrPropertyWithValue("likesCount", 1L);
+	}
+
+	@Test
+	@Order(17)
+	public void shouldThrowExceptionWhenAddLike() {
+		assertThatThrownBy(() -> filmDbStorage.addLike(2, 6)).isInstanceOf(IllegalArgumentException.class);
+	}
+
+	@Test
+	@Order(18)
+	public void shouldReturnLikes() {
+		filmDbStorage.addLike(2, 3);
+		long likes = filmDbStorage.getLikes(2);
+		assertThat(likes).isEqualTo(2L);
+	}
+
+	@Test
+	@Order(19)
+	public void shouldReturnPopular() {
+		filmDbStorage.addLike(1, 1);
+
+		Collection<Film> popularFilms = filmDbStorage.getPopular(5);
+
+		assertThat(popularFilms).hasSize(3);
+		assertThat(popularFilms.toArray()[0]).hasFieldOrPropertyWithValue("id", 2L);
+		assertThat(popularFilms.toArray()[1]).hasFieldOrPropertyWithValue("id", 1L);
+	}
+
+	@Test
+	@Order(20)
+	public void shouldThrowExceptionWhenDeleteLike() {
+		assertThatThrownBy(() -> filmDbStorage.deleteLike(2, 2)).isInstanceOf(ItemNotFoundException.class);
+	}
+
+	@Test
+	@Order(21)
+	public void shouldDeleteFilm() {
+		filmDbStorage.delete(3);
+
+		Collection<Film> filmCollection = filmDbStorage.getAll();
+		assertThat(filmCollection).hasSize(2);
+	}
+
+	@Test
+	@Order(22)
+	public void shouldReturnAllGenres() {
+		Collection<Genre> genres = filmDbStorage.getGenres();
+		assertThat(genres).hasSize(6);
+		assertThat(genres.toArray()[0]).hasFieldOrPropertyWithValue("name", "Комедия");
+	}
+
+	@Test
+	@Order(23)
+	public void shouldThrowExceptionWhenGetWrongGenre() {
+		assertThatThrownBy(() -> filmDbStorage.getGenre(8)).isInstanceOf(ItemNotFoundException.class);
+	}
+
+	@Test
+	@Order(24)
+	public void shouldReturnGenreById() {
+		Genre genre = filmDbStorage.getGenre(2);
+		assertThat(genre).hasFieldOrPropertyWithValue("name", "Драма");
+	}
+
+	@Test
+	@Order(25)
+	public void shouldReturnAllRatings() {
+		Collection<MpaRating> ratings = filmDbStorage.getRatings();
+		assertThat(ratings).hasSize(5);
+		assertThat(ratings.toArray()[4]).hasFieldOrPropertyWithValue("name", "NC-17");
+	}
+
+	@Test
+	@Order(26)
+	public void shouldReturnRatingById() {
+		MpaRating rating = filmDbStorage.getMpa(1);
+		assertThat(rating).hasFieldOrPropertyWithValue("name", "G");
+	}
 }

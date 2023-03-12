@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.ItemNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidateException;
@@ -170,9 +169,10 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Collection<Film> getPopular(int count) {
-        String sql = "SELECT * FROM films AS f LEFT JOIN films_likes AS fl ON f.film_id=fl.film_id" +
-                " LEFT JOIN ratings AS r ON f.rating_id=r.rating_id GROUP BY f.film_id ORDER BY COUNT(fl.film_id) DESC, " +
-                "f.title LIMIT ?";
+        String sql = "SELECT f.film_id, f.title, f.description, f.duration, f.release_date, f.rating_id, r.rating_name, " +
+                "COUNT(fl.user_id) FROM films AS f LEFT JOIN films_likes AS fl ON f.film_id=fl.film_id " +
+                "LEFT JOIN ratings AS r ON f.rating_id=r.rating_id GROUP BY f.film_id " +
+                "ORDER BY COUNT(fl.user_id) DESC, f.title LIMIT ?";
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), count);
     }
 
