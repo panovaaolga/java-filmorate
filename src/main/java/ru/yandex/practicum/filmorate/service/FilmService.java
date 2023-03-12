@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,7 +27,7 @@ public class FilmService {
         this.userStorage = userStorage;
     }
 
-    public void addLike(long filmId, long userId) throws ItemNotFoundException {
+    public void addLikeInMemo(long filmId, long userId) throws ItemNotFoundException {
         if (filmStorage.get(filmId) != null && userStorage.get(userId) != null) {
             filmStorage.get(filmId).addLike(userId);
         } else {
@@ -35,13 +36,21 @@ public class FilmService {
         }
     }
 
-    public void deleteLike(long filmId, long userId) {
+    public void addLike(long filmId, long userId) {
+        filmStorage.addLike(filmId, userId);
+    }
+
+    public void deleteLikeInMemo(long filmId, long userId) {
         if (filmStorage.get(filmId) != null && filmStorage.get(filmId).getLikedUsersIds().contains(userId)) {
             filmStorage.get(filmId).deleteLike(userId);
         } else {
             log.info("ItemNotFoundException: {}", "Фильм или лайк от юзера с такими id не найдены");
             throw new ItemNotFoundException("Фильм или лайк от юзера с такими id не найдены");
         }
+    }
+
+    public void deleteLike(long filmId, long userId) {
+        filmStorage.deleteLike(filmId, userId);
     }
 
     public long getLikesAmount(long filmId) {
@@ -51,6 +60,14 @@ public class FilmService {
             log.info("ItemNotFoundException: {}", "Фильм с такими id не найден");
             throw new ItemNotFoundException("Фильм с такими id не найден");
         }
+    }
+
+    public int getLikes(long filmId) {
+       return filmStorage.getLikes(filmId);
+    }
+
+    public Collection<Film> getPopular(int count) {
+        return filmStorage.getPopular(count);
     }
 
     public List<Film> getTopFilms(int count) {

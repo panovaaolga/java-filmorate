@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.controllers;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.ItemNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidateException;
@@ -74,16 +73,16 @@ public class FilmController extends AbstractController<Film> {
     @GetMapping("{id}/likes")
     public long getLikes(@PathVariable long id) {
         log.info("Отображение количества лайков у фильма с id {}", id);
-        return filmService.getLikesAmount(id);
+        return filmService.getLikes(id);
     }
 
     @GetMapping("/popular")
-    public List<Film> getPopular(@RequestParam Optional<Integer> count) {
+    public Collection<Film> getPopular(@RequestParam Optional<Integer> count) {
         log.info("Получение списка наиболее популярных фильмов");
         if (count.isPresent()) {
-            return filmService.getTopFilms(count.get());
+            return filmService.getPopular(count.get());
         }
-        return filmService.getTopFilms(DEFAULT_TOP_FILMS);
+        return filmService.getPopular(DEFAULT_TOP_FILMS);
     }
 
 }

@@ -4,8 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.ValidateException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.MpaRating;
 
 import java.time.LocalDate;
+import java.util.Collection;
 
 @Component
 @Slf4j
@@ -29,5 +32,45 @@ public class InMemoryFilmStorage extends AbstractInMemoryStorage<Film> implement
             log.info("ValidateException: {}", "Продолжительность должна быть положительной");
             throw new ValidateException("Продолжительность должна быть положительной");
         }
+    }
+
+    @Override
+    public void addLike(long filmId, long userId) {
+
+    }
+
+    @Override
+    public void deleteLike(long filmId, long userId) {
+
+    }
+
+    @Override
+    public int getLikes(long filmId) {
+        return 0;
+    }
+
+    @Override
+    public Collection<Film> getPopular(int count) {
+        return null;
+    }
+
+    @Override
+    public Collection<Genre> getGenres() {
+        return null;
+    }
+
+    @Override
+    public Genre getGenre(int genreId) {
+        return null;
+    }
+
+    @Override
+    public Collection<MpaRating> getRatings() {
+        return null;
+    }
+
+    @Override
+    public MpaRating getMpa(int mpaId) {
+        return null;
     }
 }
