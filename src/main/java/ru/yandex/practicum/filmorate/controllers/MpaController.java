@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.controllers;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exceptions.ForbiddenException;
 import ru.yandex.practicum.filmorate.exceptions.ValidateException;
 import ru.yandex.practicum.filmorate.model.MpaRating;
 import ru.yandex.practicum.filmorate.service.FilmService;
@@ -20,12 +21,12 @@ public class MpaController extends AbstractController<MpaRating>{
 
     @Override
     public MpaRating create(MpaRating mpaRating) throws ValidateException {
-        return null;
+        throw new ForbiddenException("Действие недоступно");
     }
 
     @Override
     public MpaRating update(MpaRating mpaRating) throws ValidateException {
-        return null;
+        throw new ForbiddenException("Действие недоступно");
     }
 
     @Override
@@ -44,6 +45,6 @@ public class MpaController extends AbstractController<MpaRating>{
 
     @Override
     public void delete(long id) {
-
+        throw new ForbiddenException("Действие недоступно");
     }
 }
