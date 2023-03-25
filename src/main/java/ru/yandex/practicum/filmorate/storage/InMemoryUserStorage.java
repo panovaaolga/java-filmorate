@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.exceptions.ValidateException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
+import java.util.Collection;
 
 @Component
 @Slf4j
@@ -29,5 +30,24 @@ public class InMemoryUserStorage extends AbstractInMemoryStorage<User> implement
             log.info("ValidateException: {}", "Дата рождения не может быть в будущем");
             throw new ValidateException("Дата рождения не может быть в будущем");
         }
+    }
+
+    @Override
+    public void addFriend(long userId, long friendId) {
+    }
+
+    @Override
+    public void deleteFriend(long userId, long friendId) {
+
+    }
+
+    @Override
+    public Collection<User> getFriends(long userId) {
+        return null;
+    }
+
+    @Override
+    public Collection<User> getCommonFriends(long firstId, long secondId) {
+        return null;
     }
 }

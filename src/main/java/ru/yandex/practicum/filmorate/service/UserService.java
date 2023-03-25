@@ -32,6 +32,14 @@ public class UserService {
         }
     }
 
+    public void addFriend(long userId, long friendId) {
+       userStorage.addFriend(userId, friendId);
+    }
+
+    public void deleteFriend(long userId, long friendId) {
+        userStorage.deleteFriend(userId, friendId);
+    }
+
     public void deleteFriends(long receiverId, long senderId) {
         if (userStorage.get(receiverId) != null && userStorage.get(senderId) != null) {
             userStorage.get(receiverId).removeFriend(senderId);
@@ -48,6 +56,14 @@ public class UserService {
             allFriendsList.add(userStorage.get(id));
         }
         return allFriendsList;
+    }
+
+    public Collection<User> getFriends(long userId) {
+        return userStorage.getFriends(userId);
+    }
+
+    public Collection<User> getCommonFriends(long firstId, long secondId) {
+        return userStorage.getCommonFriends(firstId, secondId);
     }
 
     public List<User> getMutualFriends(long userId, long friendId) {
